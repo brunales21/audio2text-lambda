@@ -57,7 +57,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub "${FunctionName}-${Env}"
-      CodeUri: target/              # SAM cogerá el jar sombreado de 'sam build'
+      CodeUri: .              # SAM cogerá el jar sombreado de 'sam build'
       AutoPublishAlias: live
       DeploymentPreference:
         Type: Canary10Percent5Minutes   # 10% -> 5 min -> 100%
