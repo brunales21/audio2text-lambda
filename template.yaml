@@ -30,9 +30,7 @@ Globals:
       Variables:
         LOG_LEVEL: !Ref LogLevel
         ENV: !Ref Env
-    Policies:
-      - AWSLambdaBasicExecutionRole
-    Architectures: [arm64]          # más barato y rápido en muchos casos
+    Architectures: [arm64]
     Tags:
       service: !Ref FunctionName
       env: !Ref Env
@@ -59,28 +57,29 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub "${FunctionName}-${Env}"
-      CodeUri: target/ # SAM tomará el .jar sombreado desde 'sam build'
+      CodeUri: target/              # SAM cogerá el jar sombreado de 'sam build'
       AutoPublishAlias: live
       DeploymentPreference:
-        Type: Canary10Percent5Minutes     # 10% -> 5 min -> 100%
+        Type: Canary10Percent5Minutes   # 10% -> 5 min -> 100%
         Alarms:
           - !Ref FunctionErrorsAlarm
         Hooks:
           PreTraffic: !Ref PreTrafficHook
-          # PostTraffic: !Ref PostTrafficHook  # opcional
       Events:
-        ApiInvoke:                         # si expones por API Gateway HttpApi
+        ApiInvoke:                     # (opcional) HttpApi para probar
           Type: HttpApi
           Properties:
             Path: /hello
             Method: GET
+      Policies:                        # ✅ Policies aquí (NO en Globals)
+        - AWSLambdaBasicExecutionRole
 
-  # Hook de validación (ejecuta un smoke test antes de enrutar todo el tráfico)
+  # Hook de validación (smoke test antes de enrutar todo el tráfico)
   PreTrafficHook:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub "${FunctionName}-${Env}-preHook"
-      CodeUri: hooks/pre-traffic/       # un pequeño handler que haga un ping/healthcheck
+      CodeUri: hooks/pre-traffic/
       Handler: com.example.hooks.PreHook::handleRequest
       Runtime: java17
       MemorySize: 256

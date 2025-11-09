@@ -8,28 +8,26 @@ on:
       - 'release/**'
   pull_request:
     branches: [ develop, main ]
+  workflow_dispatch: {}
 
 jobs:
   build-test:
     runs-on: ubuntu-latest
 
-    # 👇 Esto da permisos a GitHub Actions para emitir el token OIDC
     permissions:
       contents: read
-      id-token: write   # ⭐️ necesario para autenticarse en AWS sin access keys
+      id-token: write   # necesario para OIDC
 
     steps:
       - name: Checkout del código
         uses: actions/checkout@v4
 
-      # ⭐️⭐️ AQUÍ VA EL BLOQUE DE CREDENCIALES AWS
       - name: Configurar credenciales AWS (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}  # lo definiste en Settings > Secrets
-          aws-region: eu-west-1                        # cambia según tu región
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: eu-west-1  # cambia si usas otra
 
-      # (Opcional) Verificar identidad
       - name: ¿Quién soy en AWS?
         run: aws sts get-caller-identity
 
@@ -46,13 +44,16 @@ jobs:
       - name: Instalar SAM CLI
         run: pip install aws-sam-cli
 
+      - name: SAM validate (lint)
+        run: sam validate --lint
+
       - name: SAM build
         run: sam build --use-container
 
-      - name: SAM deploy
+      - name: SAM deploy (dev)
         run: |
           sam deploy \
-            --stack-name instaideas-audio2text-lambda \
+            --stack-name instaideas-audio2text-lambda-dev \
             --template-file .aws-sam/build/template.yaml \
             --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
             --no-fail-on-empty-changeset \
