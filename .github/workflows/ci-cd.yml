@@ -56,7 +56,6 @@ jobs:
       - name: SAM deploy (dev)
         run: |
           sam deploy \
-            --no-build \  
             --stack-name audio2text-lambda \
             --template-file template.yaml \
             --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
