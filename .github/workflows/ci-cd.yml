@@ -48,7 +48,7 @@ jobs:
         run: sam validate --lint
 
       - name: SAM build
-        run: sam build --use-container
+        run: sam build
 
       - name: SAM deploy (dev)
         run: |
