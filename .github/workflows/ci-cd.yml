@@ -59,7 +59,6 @@ jobs:
             --no-build \  
             --stack-name audio2text-lambda \
             --template-file template.yaml \
-            --template-file .aws-sam/build/template.yaml \
             --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
             --no-fail-on-empty-changeset \
             --parameter-overrides Env=dev FunctionName=audio2text-lambda \

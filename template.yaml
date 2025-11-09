@@ -63,8 +63,7 @@ Resources:
         Type: Canary10Percent5Minutes   # 10% -> 5 min -> 100%
         Alarms:
           - !Ref FunctionErrorsAlarm
-        Hooks:
-          PreTraffic: !Ref PreTrafficHook
+
       Events:
         ApiInvoke:                     # (opcional) HttpApi para probar
           Type: HttpApi
@@ -72,19 +71,6 @@ Resources:
             Path: /hello
             Method: GET
       Policies:                        # ✅ Policies aquí (NO en Globals)
-        - AWSLambdaBasicExecutionRole
-
-  # Hook de validación (smoke test antes de enrutar todo el tráfico)
-  PreTrafficHook:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Sub "${FunctionName}-${Env}-preHook"
-      CodeUri: hooks/pre-traffic/
-      Handler: com.example.hooks.PreHook::handleRequest
-      Runtime: java17
-      MemorySize: 256
-      Timeout: 5
-      Policies:
         - AWSLambdaBasicExecutionRole
 
 Outputs:
