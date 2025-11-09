@@ -1,0 +1,61 @@
+name: ci-cd-lambda-java
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+      - 'release/**'
+  pull_request:
+    branches: [ develop, main ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    # 👇 Esto da permisos a GitHub Actions para emitir el token OIDC
+    permissions:
+      contents: read
+      id-token: write   # ⭐️ necesario para autenticarse en AWS sin access keys
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      # ⭐️⭐️ AQUÍ VA EL BLOQUE DE CREDENCIALES AWS
+      - name: Configurar credenciales AWS (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}  # lo definiste en Settings > Secrets
+          aws-region: eu-west-1                        # cambia según tu región
+
+      # (Opcional) Verificar identidad
+      - name: ¿Quién soy en AWS?
+        run: aws sts get-caller-identity
+
+      - name: Instalar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Compilar y testear
+        run: mvn -B -ntp clean verify
+
+      - name: Instalar SAM CLI
+        run: pip install aws-sam-cli
+
+      - name: SAM build
+        run: sam build --use-container
+
+      - name: SAM deploy
+        run: |
+          sam deploy \
+            --stack-name instaideas-audio2text-lambda \
+            --template-file .aws-sam/build/template.yaml \
+            --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
+            --no-fail-on-empty-changeset \
+            --parameter-overrides Env=dev FunctionName=audio2text-lambda \
+            --resolve-s3 \
+            --confirm-changeset

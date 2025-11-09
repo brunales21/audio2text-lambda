@@ -1,0 +1,95 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Lambda Java con CI/CD, alias y despliegue canario
+
+Parameters:
+  Env:
+    Type: String
+    AllowedValues: [dev, pre, prod]
+  FunctionName:
+    Type: String
+    Default: audio2text-lambda
+  MemorySize:
+    Type: Number
+    Default: 512
+  Timeout:
+    Type: Number
+    Default: 10
+  LogLevel:
+    Type: String
+    Default: INFO
+
+Globals:
+  Function:
+    Runtime: java17
+    Handler: com.brunales.Handler::handleRequest
+    MemorySize: !Ref MemorySize
+    Timeout: !Ref Timeout
+    Tracing: Active
+    Environment:
+      Variables:
+        LOG_LEVEL: !Ref LogLevel
+        ENV: !Ref Env
+    Policies:
+      - AWSLambdaBasicExecutionRole
+    Architectures: [arm64]          # más barato y rápido en muchos casos
+    Tags:
+      service: !Ref FunctionName
+      env: !Ref Env
+
+Resources:
+  # Alarmas para rollback (ejemplo: error rate alto)
+  FunctionErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${FunctionName}-${Env}-5xx"
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: 1
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: 60
+      Statistic: Sum
+      Threshold: 1
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref Function
+      TreatMissingData: notBreaching
+
+  Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${FunctionName}-${Env}"
+      CodeUri: target/ # SAM tomará el .jar sombreado desde 'sam build'
+      AutoPublishAlias: live
+      DeploymentPreference:
+        Type: Canary10Percent5Minutes     # 10% -> 5 min -> 100%
+        Alarms:
+          - !Ref FunctionErrorsAlarm
+        Hooks:
+          PreTraffic: !Ref PreTrafficHook
+          # PostTraffic: !Ref PostTrafficHook  # opcional
+      Events:
+        ApiInvoke:                         # si expones por API Gateway HttpApi
+          Type: HttpApi
+          Properties:
+            Path: /hello
+            Method: GET
+
+  # Hook de validación (ejecuta un smoke test antes de enrutar todo el tráfico)
+  PreTrafficHook:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${FunctionName}-${Env}-preHook"
+      CodeUri: hooks/pre-traffic/       # un pequeño handler que haga un ping/healthcheck
+      Handler: com.example.hooks.PreHook::handleRequest
+      Runtime: java17
+      MemorySize: 256
+      Timeout: 5
+      Policies:
+        - AWSLambdaBasicExecutionRole
+
+Outputs:
+  ApiUrl:
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com"
+    Export:
+      Name: !Sub "${FunctionName}-${Env}-ApiUrl"
