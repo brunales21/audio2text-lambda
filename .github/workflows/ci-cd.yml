@@ -47,13 +47,18 @@ jobs:
       - name: SAM validate (lint)
         run: sam validate --lint
 
-      - name: SAM build
-        run: sam build --template-file template.yaml
+      - name: Comprobar artefacto
+        run: |
+          ls -lah target
+          test -f target/app.jar && echo "JAR OK" || (echo "FALTA target/app.jar" && exit 1)
+
 
       - name: SAM deploy (dev)
         run: |
           sam deploy \
+            --no-build \  
             --stack-name audio2text-lambda \
+            --template-file template.yaml \
             --template-file .aws-sam/build/template.yaml \
             --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
             --no-fail-on-empty-changeset \
