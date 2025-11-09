@@ -43,6 +43,7 @@
     </dependencies>
 
     <build>
+        <finalName>app</finalName>
         <plugins>
             <!-- Empaqueta un fat JAR con la clase handler -->
             <plugin>
