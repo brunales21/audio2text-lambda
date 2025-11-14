@@ -29,15 +29,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Create deployment zip
-        run: |
-          mkdir -p build
-          cp target/audio2text-lambda-1.0-SNAPSHOT.jar build/
-          cd build
-          zip function.zip audio2text-lambda-1.0-SNAPSHOT.jar
-
       - name: Deploy to AWS Lambda
         run: |
           aws lambda update-function-code \
             --function-name audio2text-lambda-dev \
-            --zip-file fileb://build/function.zip
+            --zip-file fileb://target/audio2text-lambda-1.0-SNAPSHOT.jar
