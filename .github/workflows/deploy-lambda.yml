@@ -33,4 +33,4 @@ jobs:
         run: |
           aws lambda update-function-code \
             --function-name audio2text-lambda-dev \
-            --zip-file fileb://target/audio2text-lambda-1.0-SNAPSHOT.jar
+            --zip-file fileb://target/audio2text-lambda-1.0-SNAPSHOT-all.jar

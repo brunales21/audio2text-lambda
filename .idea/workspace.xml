@@ -4,11 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6d01f2cb-0bad-416e-9d12-c9154ba9afa7" name="Changes" comment="fix: deploy jar directly">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/brunales/Handler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/brunales/Handler.java" afterDir="false" />
-    </list>
+    <list default="true" id="6d01f2cb-0bad-416e-9d12-c9154ba9afa7" name="Changes" comment="chore: S3 test" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -106,7 +102,15 @@
       <option name="project" value="LOCAL" />
       <updated>1763147446021</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="chore: S3 test">
+      <option name="closed" value="true" />
+      <created>1763148875714</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1763148875714</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -126,6 +130,7 @@
     <MESSAGE value="chore: test new ci/cd n2" />
     <MESSAGE value="chore: test new ci/cd n3" />
     <MESSAGE value="fix: deploy jar directly" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: deploy jar directly" />
+    <MESSAGE value="chore: S3 test" />
+    <option name="LAST_COMMIT_MESSAGE" value="chore: S3 test" />
   </component>
 </project>
